@@ -136,8 +136,10 @@ end\
 `define M_DEF_W(wid) wid-1:0
 
 module buffer_arbiter#(
-    parameter C_BUFFER_DEPTH = 4
-    ,parameter C_DATA_WIDTH = 32
+    /* data width */
+    parameter C_DATA_WIDTH = 32
+
+    /* fifo read latency */
     ,parameter C_FIFO_READ_LATENCY = 1
 )
 (
@@ -288,6 +290,16 @@ always @ ( posedge clk) begin
     clr_empty_stick_ff <= clr_empty_stick_i ;
 end
 
+
+/* 
+C_FSM_STS__IDLE: This is the default state where the FSM waits for incoming or outgoing data requests. It handles requests for getting or putting data into the FIFO.
+
+C_FSM_STS__GET: In this state, the FSM retrieves data from the FIFO. It waits for a specified latency period before transitioning back to the idle state.
+
+C_FSM_STS__PUT: Here, the FSM puts data into the FIFO. Similar to the GET state, it waits for a latency period before returning to the idle state.
+
+C_FSM_STS__INIT: This state is responsible for initializing the FIFO. It waits for a certain condition (init_wait_fifo) before writing data into the FIFO and then transitions back to idle when initialization is complete.
+ */
 always @ (*) begin
     `M_COMB_ASSIGN(fsm)
     `M_COMB_ASSIGN(check_in)
